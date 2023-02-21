@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Upload files with AJAX to GO Server</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="./style.css" rel="stylesheet">
+    <script>
+        // SCRIPT FOR UPLOADING FILE
+        function fileUploadForm() {
+            const file = document.getElementById("inputFile").files[0];
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            fetch('http://localhost:9000/upload', {
+                method: "POST",
+                body: formData
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    document.getElementById("uploadResponse").innerHTML = data.response;
+                });
+        }
+        // SCRIPT FOR UPDATING DATA EVERY SECOND
+        function updateData() {
+            fetch('http://localhost:9000/time')
+                .then((response) => response.json())
+                .then((data) => {
+                    document.getElementById("time").innerHTML = data.time;
+                    document.getElementById("cpuData").innerHTML = data.cpuData;
+                    document.getElementById("memoryData").innerHTML = data.memoryData;
+                });
+        }
+        setInterval(updateData, 1000);
+        //  SCRIPT FOR EXECUTION COMMANDS
+        function executionForm() {
+            const command = document.getElementById("commandInput").value;
+            fetch('http://localhost:9000/execute', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `command=${command}`
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    document.getElementById("responseCommand").innerHTML = data.response;
+                });
+        }
+    </script>
+</head>
+<body>
+    <!-- UPDATED DATA EVERY SECOND -->
+    <nav class="nav justify-content-end">
+        <a href="https://www.dimensio-informatics.com/en/start.html"><img src="/dimensio-logo.png" id="logo" alt="logo"></a>
+        <div id="data">
+            <a class="nav-link link-light" id="memoryData"></a>
+            <a class="nav-link link-light" id="cpuData"></a>
+            <a class="nav-link link-light" id="time"></a>
+        </div>
+    </nav>
+    <div class="main">
+        <div class="withoutText">
+            <!-- IMAGE UPLOAD FORM -->
+            <form action="/upload" method="post" enctype="multipart/form-data" class="uploadForm">
+                <div class="input-group">
+                    <input class="form-control" type="file" id="inputFile" accept="image/*">
+                    <button class="btn btn-outline-light" type="button" id="submitButton" onclick="fileUploadForm()"> Upload </button>
+                </div>
+            </form>
+            <!-- EXECUTE INPUT -->
+            <form class="executionForm">
+                <div class="input-group">
+                    <input type="text" id="commandInput" class="form-control" placeholder="Command...">
+                    <button type="button" class="btn btn-outline-light" onclick="executionForm()">Execute</button>
+                </div>
+                <div id="responseCommand"></div>
+            </form>
+        </div>
+        <div id="rightSide">
+            <h5 id="uploadResponse"></h5>
+            <h4 class="About">
+                Hi, it's me, aru! This website is created just for fun, author is playing with GoLang, JS/AJAX and basics of net.
+                You can see local time, cpu usage, memory/ram usage on the nav bar. It updates every second. And you can upload
+                an image on the left side, which will be saved on the GoLang Server. And below it, you can see cmd, which
+                executes some basic read-only bash commands. Enjoy! ;)
+            </h4>
+        </div>
+    </div>
+</body>
+</html>
